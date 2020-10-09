@@ -34,7 +34,7 @@ export default class CameraScreen extends React.Component {
     textColorIndex: 0,
     ratio: '16:9',
     recordOptions: {
-      mute: false,
+      mute: true,
       maxDuration: 5,
       quality: RNCamera.Constants.VideoQuality['288p'],
     },
@@ -89,6 +89,7 @@ export default class CameraScreen extends React.Component {
   renderCamera() {
     return (
       <RNCamera
+        captureAudio={false}
         ref={(ref) => {
           this.camera = ref;
         }}
