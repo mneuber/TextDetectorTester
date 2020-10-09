@@ -30,6 +30,8 @@ export default class CameraScreen extends React.Component {
     depth: 0,
     type: 'back',
     whiteBalance: 'auto',
+    canDetectText: true,
+    textColorIndex: 0,
     ratio: '16:9',
     recordOptions: {
       mute: false,
@@ -45,41 +47,20 @@ export default class CameraScreen extends React.Component {
     });
   }
 
-  toggleWB() {
-    this.setState({
-      whiteBalance: wbOrder[this.state.whiteBalance],
-    });
-  }
-
-  toggleFocus() {
-    this.setState({
-      autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on',
-    });
-  }
-
-  zoomOut() {
-    this.setState({
-      zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1,
-    });
-  }
-
-  zoomIn() {
-    this.setState({
-      zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1,
-    });
-  }
-
-  setFocusDepth(depth) {
-    this.setState({
-      depth,
-    });
+  toggleTextColor() {
+    let textColorIndex = this.state.textColorIndex;
+    textColorIndex++;
+    if (textColorIndex >= textColors.length) {
+      textColorIndex = 0;
+    }
+    this.setState({textColorIndex});
   }
 
   toggle = (value) => () =>
     this.setState((prevState) => ({[value]: !prevState[value]}));
 
   renderTextBlocks = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
+    <View style={styles.textContainer} pointerEvents="none">
       {this.state.textBlocks.map(this.renderTextBlock)}
     </View>
   );
@@ -89,20 +70,14 @@ export default class CameraScreen extends React.Component {
       <Text
         style={[
           styles.textBlock,
-          {left: bounds.origin.x, top: bounds.origin.y},
+          {
+            left: bounds.origin.x,
+            top: bounds.origin.y,
+            color: textColors[this.state.textColorIndex],
+          },
         ]}>
         {value}
       </Text>
-      <View
-        style={[
-          styles.text,
-          {
-            ...bounds.size,
-            left: bounds.origin.x,
-            top: bounds.origin.y,
-          },
-        ]}
-      />
     </React.Fragment>
   );
 
@@ -133,11 +108,10 @@ export default class CameraScreen extends React.Component {
           buttonPositive: 'Ok',
           buttonNegative: 'Cancel',
         }}
-        onTextRecognized={this.textRecognized}>
-        <View
-          style={{
-            flex: 0.5,
-          }}>
+        onTextRecognized={
+          this.state.canDetectText ? this.textRecognized : null
+        }>
+        <View>
           <View
             style={{
               backgroundColor: 'transparent',
@@ -145,76 +119,25 @@ export default class CameraScreen extends React.Component {
               justifyContent: 'space-around',
             }}>
             <TouchableOpacity
+              onPress={this.toggle('canDetectText')}
+              style={styles.flipButton}>
+              <Text style={styles.flipText}>
+                {!this.state.canDetectText ? 'Show Text' : 'Hide Text'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={this.toggleTextColor.bind(this)}
+              style={styles.flipButton}>
+              <Text style={styles.flipText}>{'Change Text Color'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={styles.flipButton}
               onPress={this.toggleFlash.bind(this)}>
               <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.flipButton}
-              onPress={this.toggleWB.bind(this)}>
-              <Text style={styles.flipText}>
-                {' '}
-                WB: {this.state.whiteBalance}{' '}
-              </Text>
-            </TouchableOpacity>
           </View>
-          <View
-            style={{
-              backgroundColor: 'transparent',
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-            }}></View>
         </View>
-        <View
-          style={{
-            flex: 0.4,
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-          }}>
-          <Slider
-            style={{width: 150, marginTop: 15, alignSelf: 'flex-end'}}
-            onValueChange={this.setFocusDepth.bind(this)}
-            step={0.1}
-            disabled={this.state.autoFocus === 'on'}
-          />
-        </View>
-        <View
-          style={{
-            flex: 0.1,
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-          }}></View>
-        {this.state.zoom !== 0 && (
-          <Text style={[styles.flipText, styles.zoomText]}>
-            Zoom: {this.state.zoom}
-          </Text>
-        )}
-        <View
-          style={{
-            flex: 0.1,
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            alignSelf: 'flex-end',
-          }}>
-          <TouchableOpacity
-            style={[styles.flipButton, {flex: 0.1, alignSelf: 'flex-end'}]}
-            onPress={this.zoomIn.bind(this)}>
-            <Text style={styles.flipText}> + </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.flipButton, {flex: 0.1, alignSelf: 'flex-end'}]}
-            onPress={this.zoomOut.bind(this)}>
-            <Text style={styles.flipText}> - </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.flipButton, {flex: 0.25, alignSelf: 'flex-end'}]}
-            onPress={this.toggleFocus.bind(this)}>
-            <Text style={styles.flipText}> AF : {this.state.autoFocus} </Text>
-          </TouchableOpacity>
-        </View>
-        {this.renderTextBlocks()}
+        {!!this.state.canDetectText && this.renderTextBlocks()}
       </RNCamera>
     );
   }
@@ -223,6 +146,8 @@ export default class CameraScreen extends React.Component {
     return <View style={styles.container}>{this.renderCamera()}</View>;
   }
 }
+
+const textColors = ['red', 'blue', 'black', 'white'];
 
 const styles = StyleSheet.create({
   container: {
@@ -247,73 +172,22 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 15,
   },
-  detectText: {
-    color: 'white',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  labelText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  zoomText: {
-    position: 'absolute',
-    bottom: 70,
-    zIndex: 2,
-    left: 2,
-  },
-  picButton: {
-    backgroundColor: 'darkseagreen',
-  },
-  facesContainer: {
+  textContainer: {
     position: 'absolute',
     bottom: 0,
     right: 0,
     left: 0,
     top: 0,
-  },
-  labelsContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    left: 0,
-    top: 0,
-    paddingTop: 150,
-    alignItems: 'center',
-  },
-  face: {
-    padding: 10,
-    borderWidth: 2,
-    borderRadius: 2,
-    position: 'absolute',
-    borderColor: '#FFD700',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  landmark: {
-    width: landmarkSize,
-    height: landmarkSize,
-    position: 'absolute',
-    backgroundColor: 'red',
-  },
-  faceText: {
-    color: '#FFD700',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    margin: 10,
-    backgroundColor: 'transparent',
   },
   text: {
-    padding: 10,
+    fontSize: 15,
+    padding: 5,
     borderWidth: 2,
     borderRadius: 2,
     position: 'absolute',
-    borderColor: '#F00',
     justifyContent: 'center',
   },
   textBlock: {
-    color: '#F00',
     position: 'absolute',
     textAlign: 'center',
     backgroundColor: 'transparent',
