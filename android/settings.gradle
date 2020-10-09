@@ -1,0 +1,5 @@
+rootProject.name = 'TextDetectorTester'
+include ':react-native-camera-standalone-mlkit'
+project(':react-native-camera-standalone-mlkit').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-camera-standalone-mlkit/android')
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+include ':app'
