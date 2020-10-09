@@ -33,11 +33,6 @@ export default class CameraScreen extends React.Component {
     canDetectText: true,
     textColorIndex: 0,
     ratio: '16:9',
-    recordOptions: {
-      mute: true,
-      maxDuration: 5,
-      quality: RNCamera.Constants.VideoQuality['288p'],
-    },
     textBlocks: [],
   };
 
