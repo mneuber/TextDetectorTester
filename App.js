@@ -116,7 +116,6 @@ export default class CameraScreen extends React.Component {
             style={{
               backgroundColor: 'transparent',
               flexDirection: 'row',
-              justifyContent: 'space-around',
             }}>
             <TouchableOpacity
               onPress={this.toggle('canDetectText')}
@@ -125,15 +124,22 @@ export default class CameraScreen extends React.Component {
                 {!this.state.canDetectText ? 'Show Text' : 'Hide Text'}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={this.toggleTextColor.bind(this)}
-              style={styles.flipButton}>
-              <Text style={styles.flipText}>{'Change Text Color'}</Text>
-            </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.flipButton}
               onPress={this.toggleFlash.bind(this)}>
               <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              backgroundColor: 'transparent',
+              flexDirection: 'row',
+            }}>
+            <TouchableOpacity
+              onPress={this.toggleTextColor.bind(this)}
+              style={styles.flipButton}>
+              <Text style={styles.flipText}>{'Change Text Color'}</Text>
             </TouchableOpacity>
           </View>
         </View>
